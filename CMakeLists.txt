@@ -20,6 +20,7 @@ add_library(
     src/tasty.cpp
     include/tasty/tasty.hpp
     include/tasty/errors.hpp
+    include/tasty/runners.hpp
 )
 add_library(tasty::tasty ALIAS tasty_tasty)
 

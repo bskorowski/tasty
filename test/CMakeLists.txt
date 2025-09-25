@@ -29,6 +29,7 @@ endfunction()
 
 
 Register_Test(tasty_test)
+Register_Test(runner_test)
 
 # ---- End-of-file commands ----
 
