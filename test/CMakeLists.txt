@@ -14,11 +14,21 @@ endif()
 
 # ---- Tests ----
 
-add_executable(tasty_test src/tasty_test.cpp)
-target_link_libraries(tasty_test PRIVATE tasty::tasty)
-target_compile_features(tasty_test PRIVATE cxx_std_23)
 
-add_test(NAME tasty_test COMMAND tasty_test)
+add_library(tastyTestCommon INTERFACE)
+# Including private sources
+# target_include_directories(tastyTestCommon INTERFACE ${CMAKE_SOURCE_DIR}/src)
+target_link_libraries(tastyTestCommon INTERFACE tasty::tasty)
+
+function(Register_Test name)
+   add_executable(${name} src/${name}.cpp)
+   target_link_libraries(${name} PRIVATE tastyTestCommon)
+   target_compile_features(${name} PRIVATE cxx_std_23)
+   add_test(NAME ${name} COMMAND ${name})
+endfunction()
+
+
+Register_Test(tasty_test)
 
 # ---- End-of-file commands ----
 

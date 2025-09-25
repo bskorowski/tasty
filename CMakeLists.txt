@@ -18,6 +18,8 @@ include(cmake/variables.cmake)
 add_library(
     tasty_tasty
     src/tasty.cpp
+    include/tasty/tasty.hpp
+    include/tasty/errors.hpp
 )
 add_library(tasty::tasty ALIAS tasty_tasty)
 

@@ -15,9 +15,8 @@ namespace tasty {
    * @brief lala
    * @param expected Llaa
    */
-  template <typename T>
-    requires std::equality_comparable<T>
-  constexpr auto expectEqual(const T& expected, const T& actual) -> void {
+  template <std::equality_comparable T>
+  constexpr void expectEqual(const T& expected, const T& actual) {
     if (expected != actual) {
       throw errors::ExpectFailed(
           std::format("Expected: {} but got {}", expected, actual));
@@ -25,7 +24,8 @@ namespace tasty {
   }
 
   template <ExceptionType Exception, typename Func, typename... Args>
-  constexpr auto expectException(Func&& func, Args&&... args) -> void {
+    requires std::invocable<Func, Args...>
+  constexpr void expectException(Func&& func, Args&&... args) {
     try {
       std::invoke(std::forward<Func>(func), std::forward<Args>(args)...);
 
