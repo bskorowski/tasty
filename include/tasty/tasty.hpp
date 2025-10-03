@@ -11,6 +11,28 @@
 
 namespace tasty {
 
+  namespace internal {
+
+#ifdef _MSC_VER
+    template <typename T>
+    constexpr auto typeName() -> std::string {
+      return typeid(T).name();
+    }
+#else
+#include <cxxabi.h>
+    template <typename T>
+    constexpr auto typeName() -> std::string {
+      int status = -1;
+      auto demangledName = std::string(
+          abi::__cxa_demangle(typeid(T).name(), nullptr, nullptr, &status));
+      if (status != 0) {
+        return "Unknown";
+      }
+      return demangledName;
+    }
+#endif
+  }  // namespace internal
+
   /**
    * @brief lala
    * @param expected Llaa
@@ -18,8 +40,15 @@ namespace tasty {
   template <std::equality_comparable T>
   constexpr void expectEqual(const T& expected, const T& actual) {
     if (expected != actual) {
-      throw errors::ExpectFailed(
-          std::format("Expected: {} but got {}", expected, actual));
+      if constexpr (std::formattable<T, char>) {
+        throw errors::ExpectFailed(
+            std::format("Expected: {} but got {}", expected, actual));
+      } else {
+        throw errors::ExpectFailed(
+            std::format("Unexpected value encountered. No std::formatter for "
+                        "type '{}' exists. Can't prin't it.",
+                        internal::typeName<T>()));
+      }
     }
   }
 

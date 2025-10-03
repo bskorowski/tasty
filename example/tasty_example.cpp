@@ -14,6 +14,15 @@ static constexpr auto throwsIfTrue(
   }
 }
 
+struct UnformattableStruct {
+  int x;
+  int y;
+
+  auto operator==(const UnformattableStruct& other) const -> bool {
+    return x == other.x && y == other.y;
+  }
+};
+
 constexpr auto throwNonExcpetion() { throw 15; }  // NOLINT
 
 auto main() -> int {  // NOLINT
@@ -63,5 +72,16 @@ auto main() -> int {  // NOLINT
     std::println(
         "Function threw something other than expected std::runtime_error "
         "exception");
+  }
+
+  // If a type without std::formatter specialization is encountered tasty cannot
+  // format it correctly, so it will just throw an error that expect failed
+  // (because values don't match), And no  // detailed value information will be
+  // provided since tasty cannot print it. (?yet?)
+  try {
+    tasty::expectEqual(UnformattableStruct{.x = 5, .y = 9},        // NOLINT
+                       UnformattableStruct{.x = 152, .y = 1952});  // NOLINT
+  } catch (const tasty::errors::ExpectFailed& err) {
+    std::println("{}", err.what());
   }
 }
