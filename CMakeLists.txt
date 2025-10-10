@@ -24,6 +24,17 @@ add_library(
 )
 add_library(tasty::tasty ALIAS tasty_tasty)
 
+include(FetchContent)
+
+FetchContent_Declare(
+   rainbowcpp
+   GIT_REPOSITORY https://github.com/oosiriiss/rainbowcpp
+   GIT_TAG 0.2
+)
+FetchContent_MakeAvailable(rainbowcpp)
+
+target_link_libraries(tasty_tasty PUBLIC rainbowcpp::rainbowcpp)
+
 include(GenerateExportHeader)
 generate_export_header(
     tasty_tasty
