@@ -23,6 +23,31 @@ struct UnformattableStruct {
   }
 };
 
+struct UnformattableStructWithFormatter {
+  int x;
+  int z;
+
+  auto operator==(const UnformattableStructWithFormatter& other) const -> bool {
+    return x == other.x && z == other.z;
+  }
+};
+
+namespace std {
+  template <>
+  struct formatter<UnformattableStructWithFormatter, char> {
+    static constexpr auto parse(std::format_parse_context& ctx) {
+      return ctx.begin();
+    }
+
+    static auto format(const UnformattableStructWithFormatter& strct,
+                       std::format_context& ctx) {
+      return std::format_to(ctx.out(),
+                            "UnformattableStructWithFormatter(x={}, y={})",
+                            strct.x, strct.z);
+    }
+  };
+}  // namespace std
+
 constexpr auto throwNonExcpetion() { throw 15; }  // NOLINT
 
 auto main() -> int {  // NOLINT
@@ -81,6 +106,15 @@ auto main() -> int {  // NOLINT
   try {
     tasty::expectEqual(UnformattableStruct{.x = 5, .y = 9},        // NOLINT
                        UnformattableStruct{.x = 152, .y = 1952});  // NOLINT
+  } catch (const tasty::errors::ExpectFailed& err) {
+    std::println("{}", err.what());
+  }
+
+  // If a std::formatter is provided it is printed nicely
+  try {
+    tasty::expectEqual(
+        UnformattableStructWithFormatter{.x = 5, .z = 9},        // NOLINT
+        UnformattableStructWithFormatter{.x = 152, .z = 1952});  // NOLINT
   } catch (const tasty::errors::ExpectFailed& err) {
     std::println("{}", err.what());
   }

@@ -34,11 +34,9 @@ namespace tasty {
     constexpr void registerTest(
         std::function<void()>&& test,
         std::optional<std::string_view> testName = std::nullopt) {
-      std::string finalTestName = (testName)
-                                      ? std::string(*testName)
-                                      : std::to_string(tests_.size() + 1);
-
-      tests_.emplace_back(std::move(finalTestName), std::move(test));
+      tests_.emplace_back(((testName) ? std::string(*testName)
+                                      : std::to_string(tests_.size() + 1)),
+                          std::move(test));
     }
 
     /**
@@ -64,7 +62,7 @@ namespace tasty {
         std::println("{}All {} tests passed{}", GREEN, tests_.size(),
                      rainbow::reset());
       } else {
-        std::println("{}{} tests passed{} and {}{}tests failed{}", GREEN,
+        std::println("{}{} tests passed{} and {}{} tests failed{}", GREEN,
                      passedTests, rainbow::reset(), RED,
                      tests_.size() - passedTests, rainbow::reset());
       }

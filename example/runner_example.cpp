@@ -9,7 +9,7 @@ auto main() -> int {  // NOLINT
   // number
   TestRunner::runTest(okFunc);
   // Tests may be given names
-  TestRunner::runTest([] { tasty::expectEqual(15, 12); },
+  TestRunner::runTest([] { tasty::expectEqual(15, 12); },  // NOLINT
                       "This is a failing test");
 
   // Tests suites may be created

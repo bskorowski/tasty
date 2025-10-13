@@ -1,6 +1,5 @@
 #pragma once
 
-#include <any>
 #include <concepts>
 #include <exception>
 #include <format>
@@ -12,6 +11,11 @@
 namespace tasty {
 
   namespace internal {
+
+    template <typename T, typename CharT>
+    concept isFormattable = requires(T& val, std::format_context ctx) {
+      std::formatter<std::remove_cvref_t<T>, CharT>().format(val, ctx);
+    };
 
 #ifdef _MSC_VER
     template <typename T>
@@ -40,13 +44,13 @@ namespace tasty {
   template <std::equality_comparable T>
   constexpr void expectEqual(const T& expected, const T& actual) {
     if (expected != actual) {
-      if constexpr (std::formattable<T, char>) {
+      if constexpr (internal::isFormattable<T, char>) {
         throw errors::ExpectFailed(
             std::format("Expected: {} but got {}", expected, actual));
       } else {
         throw errors::ExpectFailed(
             std::format("Unexpected value encountered. No std::formatter for "
-                        "type '{}' exists. Can't prin't it.",
+                        "type '{}' exists. Cannot print it.",
                         internal::typeName<T>()));
       }
     }
