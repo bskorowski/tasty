@@ -34,8 +34,11 @@ namespace tasty {
     constexpr void registerTest(
         std::function<void()>&& test,
         std::optional<std::string_view> testName = std::nullopt) {
-      tests_.emplace_back(testName.value_or(std::to_string(tests_.size() + 1)),
-                          std::move(test));
+      std::string finalTestName = (testName)
+                                      ? std::string(*testName)
+                                      : std::to_string(tests_.size() + 1);
+
+      tests_.emplace_back(std::move(finalTestName), std::move(test));
     }
 
     /**
@@ -52,7 +55,7 @@ namespace tasty {
       std::size_t passedTests = 0;
 
       for (const auto& testInfo : tests_) {
-        if (runTest(testInfo.testFunc)) {
+        if (runTest(testInfo.testFunc, testInfo.name)) {
           ++passedTests;
         }
       }
@@ -61,7 +64,7 @@ namespace tasty {
         std::println("{}All {} tests passed{}", GREEN, tests_.size(),
                      rainbow::reset());
       } else {
-        std::println("{} {}tests passed{} and {} {}tests failed{}", GREEN,
+        std::println("{}{} tests passed{} and {}{}tests failed{}", GREEN,
                      passedTests, rainbow::reset(), RED,
                      tests_.size() - passedTests, rainbow::reset());
       }
@@ -87,7 +90,7 @@ namespace tasty {
           std::println("{}Test '{}' failed. Reason: {}{}", RED, *testName,
                        ex.what(), rainbow::reset());
         } else {
-          std::println("{}Test failed. reason: {}{}", GREEN, ex.what(),
+          std::println("{}Test failed. reason: {}{}", RED, ex.what(),
                        rainbow::reset());
         }
         success = false;
