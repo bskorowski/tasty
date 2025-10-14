@@ -31,12 +31,30 @@ namespace tasty {
     constexpr explicit TestRunner(std::string_view suiteName)
         : name(suiteName) {}
 
+    /**
+     * @brief Adds tests to the internal test list
+     *
+     * The test may be later ran with TestRunner::runAll()
+     * @param test The test function to be invoked.
+     * @param testName Optional test name. If none provided test number will be
+     * used.
+     */
     constexpr void registerTest(
         std::function<void()>&& test,
         std::optional<std::string_view> testName = std::nullopt) {
       tests_.emplace_back(((testName) ? std::string(*testName)
                                       : std::to_string(tests_.size() + 1)),
                           std::move(test));
+    }
+
+    /**
+     * @brief Sets a callback that runs before each test
+     *
+     * @param callback Callback invoked before each test (when running with
+     * runAll)
+     */
+    constexpr void beforeEach(const std::function<void()>& callback) {
+      beforeTestFn_ = callback;
     }
 
     /**
@@ -53,6 +71,10 @@ namespace tasty {
       std::size_t passedTests = 0;
 
       for (const auto& testInfo : tests_) {
+        if (beforeTestFn_) {
+          (*beforeTestFn_)();
+        }
+
         if (runTest(testInfo.testFunc, testInfo.name)) {
           ++passedTests;
         }
@@ -102,6 +124,8 @@ namespace tasty {
 
    private:
     std::vector<TestInfo> tests_;
+
+    std::optional<std::function<void()>> beforeTestFn_ = std::nullopt;
   };
 
 }  // namespace tasty

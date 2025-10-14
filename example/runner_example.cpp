@@ -1,3 +1,5 @@
+#include <print>
+
 #include "tasty/runners.hpp"
 #include "tasty/tasty.hpp"
 
@@ -16,12 +18,28 @@ auto main() -> int {  // NOLINT
   // Test suites will be ran all at one
   TestRunner suite("Example tests");
 
+  int someGlobalState = 0;
+
+  suite.beforeEach([&someGlobalState]() {
+    someGlobalState = 0;
+    std::println("Resetting global state to: {}", someGlobalState);
+  });
+
   // Tests may be assigned to test suites like this
-  suite.registerTest([] { return "a test:)"; });
+  suite.registerTest([&someGlobalState] {
+    std::println("Incrementing global state");
+    ++someGlobalState;
+    std::println("Global state is now: {}", someGlobalState);
+  });
+
 
   // If no nanme was specifiec for the test in suite it will be automatically
   // given a number
-  suite.registerTest([] { return "yet another  test:)"; }, "Custom test name");
+  suite.registerTest(
+      [someGlobalState] {
+        std::println("Global in second test is: {}", someGlobalState);
+      },
+      "Custom test name");
 
   // running all the tests in a suite
   return (suite.runAll()) ? 0 : -1;
