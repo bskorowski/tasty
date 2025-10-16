@@ -39,7 +39,7 @@ namespace tasty {
 
 #define TASTY_EXPECT(expression)                                         \
   if (!(expr)) {                                                         \
-    throw errors::ExpectFailed(                                          \
+    throw tasty::errors::ExpectFailed(                                   \
         std::format("Expression '{}' evaluated to false", #expression)); \
   }
 
