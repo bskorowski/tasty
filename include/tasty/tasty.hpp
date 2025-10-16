@@ -37,12 +37,18 @@ namespace tasty {
 #endif
   }  // namespace internal
 
-  /**
-   * @brief lala
+#define TASTY_EXPECT(expression)                                         \
+  if (!(expr)) {                                                         \
+    throw errors::ExpectFailed(                                          \
+        std::format("Expression '{}' evaluated to false", #expression)); \
+  }
+
+  /** @brief lala
    * @param expected Llaa
    */
-  template <std::equality_comparable T>
-  constexpr void expectEqual(const T& expected, const T& actual) {
+  template <typename T, typename U>
+    requires std::equality_comparable_with<T, U>
+  constexpr void expectEqual(const T& expected, const U& actual) {
     if (expected != actual) {
       if constexpr (internal::isFormattable<T, char>) {
         throw errors::ExpectFailed(
