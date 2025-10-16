@@ -8,6 +8,12 @@
 #include "tasty/errors.hpp"
 #include "tasty/tasty_export.hpp"
 
+#ifdef _MSC_VER
+
+#else
+#include <cxxabi.h>
+#endif
+
 namespace tasty {
 
   namespace internal {
@@ -23,7 +29,6 @@ namespace tasty {
       return typeid(T).name();
     }
 #else
-#include <cxxabi.h>
     template <typename T>
     constexpr auto typeName() -> std::string {
       int status = -1;
