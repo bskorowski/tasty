@@ -2,8 +2,12 @@
 
 #include <concepts>
 #include <exception>
+#include <filesystem>
 #include <format>
 #include <functional>
+#include <print>
+#include <source_location>
+#include <type_traits>
 
 #include "tasty/errors.hpp"
 #include "tasty/tasty_export.hpp"
@@ -40,12 +44,30 @@ namespace tasty {
       return demangledName;
     }
 #endif
+
+    [[nodiscard]] constexpr auto formatSourceLocation(
+        const std::source_location& sourceLocation) -> std::string {
+      std::string_view fileName = sourceLocation.file_name();
+
+      // Cutting out the path before file name.
+      if (const std::size_t index =
+              fileName.find_last_of(std::filesystem::path::preferred_separator);
+          index != std::string_view::npos) {
+        fileName.remove_prefix(index + 1);
+      }
+
+      return std::format("{}:{}", fileName, sourceLocation.line());
+    }
+
   }  // namespace internal
 
-#define TASTY_EXPECT(expression)                                         \
-  if (!(expression)) {                                                   \
-    throw tasty::errors::ExpectFailed(                                   \
-        std::format("Expression '{}' evaluated to false", #expression)); \
+#define TASTY_EXPECT(expression)                               \
+  if (!(expression)) {                                         \
+    throw tasty::errors::ExpectFailed(                         \
+        std::format("{} | Expression '{}' evaluated to false", \
+                    tasty::internal::formatSourceLocation(   \
+                        std::source_location::current()),      \
+                    #expression));                             \
   }
 
   /** @brief lala
@@ -53,20 +75,25 @@ namespace tasty {
    */
   template <typename T, typename U>
     requires std::equality_comparable_with<T, U>
-  constexpr void expectEqual(const T& expected, const U& actual) {
+  constexpr void expectEqual(
+      const T& expected, const U& actual,
+      std::source_location sourceLoc = std::source_location::current()) {
     if (expected != actual) {
       if constexpr (internal::isFormattable<T, char>) {
-        throw errors::ExpectFailed(
-            std::format("Expected: {} but got {}", expected, actual));
+        throw errors::ExpectFailed(std::format(
+            "{} | Expected: {} but got {}",
+            internal::formatSourceLocation(sourceLoc), expected, actual));
       } else {
-        throw errors::ExpectFailed(
-            std::format("Unexpected value encountered. No std::formatter for "
-                        "type '{}' exists. Cannot print it.",
-                        internal::typeName<T>()));
+        throw errors::ExpectFailed(std::format(
+            "{} | Unexpected value encountered. No std::formatter for "
+            "type '{}' exists. Cannot print it.",
+            internal::formatSourceLocation(sourceLoc),
+            internal::typeName<T>()));
       }
     }
   }
 
+  // Couldn't get it to work with std::source_location yet
   template <ExceptionType Exception, typename Func, typename... Args>
     requires std::invocable<Func, Args...>
   constexpr void expectException(Func&& func, Args&&... args) {
@@ -85,4 +112,5 @@ namespace tasty {
       throw errors::ExpectFailed("Function threw invalid non-std::exception.");
     }
   }
+
 }  // namespace tasty

@@ -29,7 +29,11 @@ static constexpr auto throwsIfTrue(bool shouldThrow, int someOtherArg,
 
 constexpr auto throwNonExcpetion() { throw 15; }  // NOLINT
 
-auto main() -> int {
+auto main() -> int {  // NOLINT
+
+  SHOULD_THROW(TASTY_EXPECT(false));
+  SHOULD_NOT_THROW(TASTY_EXPECT(true));
+
   SHOULD_THROW(tasty::expectEqual(32, 15);)
   SHOULD_NOT_THROW(tasty::expectEqual(69, 69));
   SHOULD_NOT_THROW(
@@ -37,6 +41,7 @@ auto main() -> int {
                                                     15,      // NOLINT
                                                     10.0F);  // NOLINT
   );
+
   SHOULD_THROW(tasty::expectException<std::runtime_error>(throwsIfTrue, true,
                                                           15,      // NOLINT
                                                           15.0F);  // NOLINT
