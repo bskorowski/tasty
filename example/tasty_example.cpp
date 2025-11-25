@@ -2,6 +2,8 @@
 #include <print>
 #include <stdexcept>
 #include <string_view>
+#include <optional>
+#include <string>
 
 #include "tasty/errors.hpp"
 #include "tasty/tasty.hpp"
@@ -116,6 +118,13 @@ auto main() -> int {  // NOLINT
         UnformattableStructWithFormatter{.x = 5, .z = 9},        // NOLINT
         UnformattableStructWithFormatter{.x = 152, .z = 1952});  // NOLINT
   } catch (const tasty::errors::ExpectFailed& err) {
+    std::println("{}", err.what());
+  }
+
+  // You can force a test to fail with
+  try {
+      tasty::fail(std::optional(std::string("tasty::fail failed!")));
+  } catch (const tasty::errors::TestFailed& err) {
     std::println("{}", err.what());
   }
 }

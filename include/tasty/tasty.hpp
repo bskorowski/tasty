@@ -65,9 +65,22 @@ namespace tasty {
   if (!(expression)) {                                         \
     throw tasty::errors::ExpectFailed(                         \
         std::format("{} | Expression '{}' evaluated to false", \
-                    tasty::internal::formatSourceLocation(   \
+                    tasty::internal::formatSourceLocation(     \
                         std::source_location::current()),      \
                     #expression));                             \
+  }
+
+  /**
+   * @brief Fails the test
+   *
+   * This function is meant to be used instead of writing TASTY_EXCEPT(false &&
+   * message) Internally it throws a tasty::errors::TestFailed with given
+   * message
+   *
+   * @param message Optional message displayed
+   */
+  constexpr void fail(std::optional<std::string> message = std::nullopt) {
+    throw errors::TestFailed(std::move(message));
   }
 
   /** @brief lala
