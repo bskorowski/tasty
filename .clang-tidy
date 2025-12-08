@@ -16,6 +16,7 @@ Checks: "*,\
   -readability-redundant-access-specifiers,\
   -cppcoreguidelines-non-private-member-variables-in-classes, \
   -misc-non-private-member-variables-in-classes, \
+  -cppcoreguidelines-avoid-do-while, \
   -misc-use-anonymous-namespace"
 WarningsAsErrors: ''
 CheckOptions:

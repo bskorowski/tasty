@@ -1,8 +1,11 @@
+#pragma once
+#include <concepts>
 #include <functional>
 #include <optional>
 #include <print>
 #include <rainbowcpp/colors.hpp>
 #include <rainbowcpp/rainbowcpp.hpp>
+#include <type_traits>
 
 constexpr static auto MAGENTA =  // NOLINT
     rainbow::color<rainbow::colors::bit4::Foreground::Magenta,
@@ -16,15 +19,47 @@ constexpr static auto RED =  // NOLINT
                    rainbow::colors::bit4::Background::Black>();
 
 namespace tasty {
-  struct TestInfo {
-    constexpr TestInfo(std::string_view testName,
-                       std::function<void(void)>&& test)
-        : name(testName),
-          testFunc(std::move(test)) {}
 
-    std::string name;
-    std::function<void(void)> testFunc;
-  };
+  namespace internal {
+    struct TestInfo {
+      constexpr TestInfo(std::string_view testName,
+                         std::function<void(void)>&& test)
+          : name(testName),
+            testFunc(std::move(test)) {}
+
+      std::string name;
+      std::function<void(void)> testFunc;
+    };
+
+    template <std::unsigned_integral T>
+    [[nodiscard]] constexpr auto digits(T num, const std::uint8_t base = 10)
+        -> std::size_t {
+      std::size_t count = 1;
+      while (num > 9) {  // NOLINT
+        num = num / base;
+        ++count;
+      }
+      return count;
+    }
+
+    template <std::integral T>
+    [[nodiscard]] constexpr auto toString(T num, const std::uint8_t base = 10)
+        -> std::string {
+      auto current = static_cast<std::size_t>((num > 0) ? num : -num);
+      std::size_t digitCount = internal::digits(current);
+      std::size_t requiredChars = (num < 0) ? (digitCount + 1) : digitCount;
+      std::string str(requiredChars, '-');
+
+      for (std::size_t i = 0; i < digitCount; ++i) {
+        auto digit = static_cast<char>('0' + (current % base));
+        str[str.size() - 1 - i] = digit;
+        current = current / base;
+      }
+
+      return str;
+    }
+
+  }  // namespace internal
 
   class TestRunner {
    public:
@@ -43,7 +78,7 @@ namespace tasty {
         std::function<void()>&& test,
         std::optional<std::string_view> testName = std::nullopt) {
       tests_.emplace_back(((testName) ? std::string(*testName)
-                                      : std::to_string(tests_.size() + 1)),
+                                      : internal::toString(tests_.size() + 1)),
                           std::move(test));
     }
 
@@ -123,7 +158,7 @@ namespace tasty {
     std::string_view name;
 
    private:
-    std::vector<TestInfo> tests_;
+    std::vector<internal::TestInfo> tests_;
 
     std::optional<std::function<void()>> beforeTestFn_ = std::nullopt;
   };
