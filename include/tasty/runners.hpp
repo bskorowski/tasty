@@ -89,7 +89,17 @@ namespace tasty {
      * runAll)
      */
     constexpr void beforeEach(const std::function<void()>& callback) {
-      beforeTestFn_ = callback;
+      beforeTestFn_.emplace(callback);
+    }
+
+    /**
+     * @brief Sets a callback that runs before each test
+     *
+     * @param callback Callback invoked before each test (when running with
+     * runAll)
+     */
+    constexpr void afterEach(const std::function<void()>& callback) {
+      afterTestFn_.emplace(callback);
     }
 
     /**
@@ -112,6 +122,10 @@ namespace tasty {
 
         if (runTest(testInfo.testFunc, testInfo.name)) {
           ++passedTests;
+        }
+
+        if (afterTestFn_) {
+          (*afterTestFn_)();
         }
       }
 
@@ -161,6 +175,7 @@ namespace tasty {
     std::vector<internal::TestInfo> tests_;
 
     std::optional<std::function<void()>> beforeTestFn_ = std::nullopt;
+    std::optional<std::function<void()>> afterTestFn_ = std::nullopt;
   };
 
 }  // namespace tasty
