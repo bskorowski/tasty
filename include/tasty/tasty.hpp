@@ -10,7 +10,6 @@
 
 #include "tasty/errors.hpp"
 #include "tasty/runners.hpp"
-#include "tasty/tasty_export.hpp"
 
 #ifdef _MSC_VER
 #else
