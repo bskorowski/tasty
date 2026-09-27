@@ -44,7 +44,7 @@ include(FetchContent)
 FetchContent_Declare(
    rainbowcpp
    GIT_REPOSITORY https://github.com/oosiriiss/rainbowcpp
-   GIT_TAG 0.2
+   GIT_TAG 869e3c92d9969a2149c6db359fd3f3a439fdf0e6 # 0.3.2
 )
 FetchContent_MakeAvailable(rainbowcpp)
 target_link_libraries(tasty_tasty INTERFACE rainbowcpp::rainbowcpp)
